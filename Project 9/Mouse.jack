@@ -1,0 +1,101 @@
+/**
+    This class draws a mouse cursor on the screen and moves the cursor according to input information  
+*/
+
+class Mouse {
+    field int x, y, size;   // track x-axis, y-axis, size of cursor
+
+    /**
+        Create cursor at given position
+    */
+    constructor Mouse new(int input_x, int input_y) {
+        let x = input_x;
+        let y = input_y;
+        let size = 4;       // 4x4 pixel square for mouse
+
+        do draw();          // draw init cursor
+        return this;
+    }
+
+    method int getX() {
+        return x;
+    }
+
+    method int getY() {
+        return y;
+    }
+
+    /**  
+        Remove the current cursor on the screen so a new one can be drawn
+    */
+    method void erase() {
+        do Screen.setColor(false);  // white
+        do Screen.drawRectangle(x - (size/2), y - (size/2), x + (size/2), y + (size/2));
+        return;
+    }
+
+    /**
+        Draw the cursor at the current position
+    */
+    method void draw() {
+        do Screen.setColor(true);   // black
+        do Screen.drawRectangle(x - (size/2), y - (size/2), x + (size/2), y + (size/2));
+        return;
+    }
+
+    /**
+        Move the the cursor to the left
+    */
+    method void moveLeft() {
+        if (x > 5) {    // accomodate for bounds of screen
+            do erase();
+            let x = x-5;
+            do draw();
+        }
+        return;
+    }
+
+    /**
+        Move the the cursor to the right
+    */
+    method void moveRight() {
+        if (x < 506) {    // accomodate for bounds of screen
+            do erase();
+            let x = x+5;
+            do draw();
+        }
+        return;
+    }
+
+    /**
+        Move the the cursor upwards
+    */
+    method void moveUp() {
+        if (y > 5) {    // accomodate for bounds of screen
+            do erase();
+            let y = y-5;
+            do draw();
+        }
+        return;
+    }
+
+    /**
+        Move the the cursor downwards
+    */
+    method void moveDown() {
+        if (y < 250) {    // accomodate for bounds of screen
+            do erase();
+            let y = y+5;
+            do draw();
+        }
+        return;
+    }
+
+    /**
+        Cleanup after program is done running
+    */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

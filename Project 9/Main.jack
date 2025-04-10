@@ -1,0 +1,58 @@
+/**
+    Main class which initializes and runs the cursor tracking and trail creation program
+*/
+
+class Main {
+    function void main() {
+        var Mouse mouse;
+        var Trail trail;
+        var boolean escKey;
+        var char keyInput;
+
+        // init mouse and trail at center of screen
+        let mouse = Mouse.new(256, 128);
+        let trail = Trail.new(mouse);
+
+        // output user instructions
+        do Output.moveCursor(0, 0);
+        do Output.printString("move with arrow keys");
+        do Output.println();
+        do Output.printString("ESC to exit program");
+
+        // main loop
+        while (~escKey) {
+            // store keystroke
+            let keyInput = Keyboard.keyPressed();
+
+            // handle movement based on keystroke
+            if (keyInput = 130) {
+                do mouse.moveLeft();    // left arrow
+            }
+            if (keyInput = 131) {
+                do mouse.moveUp();      // up arrow
+            }
+            if (keyInput = 132) {
+                do mouse.moveRight();   // right arrow
+            }
+            if (keyInput = 133) {
+                do mouse.moveDown();    // down arrow
+            }
+            if (keyInput = 140) {
+                let escKey = true;      // ESC key
+            }
+
+            // update trail effect for movement direction
+            do trail.updateTrail();
+
+            // delay to avoid bugs from too many inputs at a time
+            do Sys.wait(50);
+        }
+
+        // cleanup after escaping program
+        do trail.dispose();
+        do mouse.dispose();
+        do Screen.clearScreen();
+
+        return;
+    }
+}

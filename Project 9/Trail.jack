@@ -1,0 +1,112 @@
+/**
+    Generate a trailing effect around the mouse for the direction it's moving in
+*/
+
+class Trail {
+    field Mouse mouse;
+    field int radius;
+    field Array trailPositions;
+    field int maxTrailPositions;
+    field int curIndex;
+
+    /**
+        Create new trail for given cursor
+    */
+    constructor Trail new(Mouse m) {
+        let mouse = m;
+        let radius = 15;
+        let maxTrailPositions = 7;  // higher value means longer trail
+        let trailPositions = Array.new(maxTrailPositions*2);
+        let curIndex = 0;
+        return this;
+    }
+
+    /**
+        Draw a patterned circle around the inputted position
+    */
+    method void drawTrail(int x, int y) {
+        var int i, j;
+        var int startX, startY, endX, endY;
+
+        // get boundaries for trail
+        let startX = Math.max(0, x - radius);
+        let startY = Math.max(0, y - radius);
+        let endX = Math.min(511, x + radius);
+        let endY = Math.min(255, y + radius);
+
+        do Screen.setColor(true);   // black
+        let i = startX;
+        while (i < endX) {
+            let j = startY;
+            while (j < endY) {
+                // check if within radius
+                if ((((i-x)*(i-x))+((j-y)*(j-y))) < (radius * radius)) {
+                    // draw for every other pixel
+                    if (((i+j)&1) = 0) {
+                        do Screen.drawPixel(i, j);
+                    }
+                }
+                let j = j+1;
+            }
+            let i = i+1;
+        }
+        return;
+    }
+
+    /**
+        Erase old trail so new one can be drawn
+    */
+    method void eraseTrail(int index) {
+        var int x, y;
+
+        // get position to erase trail
+        let x = trailPositions[index * 2];
+        let y = trailPositions[(index * 2) + 1];
+
+        // erase the trail
+        do Screen.setColor(false);  // white
+        do Screen.drawCircle(x, y, radius);
+
+        return;
+    }
+
+    /**
+        Draw new trail based on the current cursor position
+    */
+    method void updateTrail() {
+        var int mouseX, mouseY;
+
+        // get current cursor position
+        let mouseX = mouse.getX();
+        let mouseY = mouse.getY();
+
+        // erase previous trail
+        if (trailPositions[(curIndex*2)] > 0) {
+            do eraseTrail(curIndex);
+        }
+
+        // store current position in trail array
+        let trailPositions[curIndex*2] = mouseX;
+        let trailPositions[(curIndex*2) + 1] = mouseY;
+
+        // draw trail at current position
+        do drawTrail(mouseX, mouseY);
+
+        // update index
+        let curIndex = curIndex + 1;
+        if (curIndex = maxTrailPositions) {
+            let curIndex = 0;
+        }
+
+        return;
+    }
+
+    /**
+        Cleanup after program is done running
+    */
+    method void dispose() {
+        do trailPositions.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

@@ -1,5 +1,9 @@
-# CS 5250 Projects 6, 7, and 8
-Repository for CS 5250 projects 6, 7, and 8. I'll rename the repo once the semester is over.
+# CS 5250 Projects
+Repository for CS 5250 projects 6 to 12 (eventually). I'll rename the repo once the semester is over.
+
+## Completed to Date
+- 6
+- 7 / 8
 
 ## Project 6
 All files are in the ```Project 6``` folder with input files under the ```input``` directory and program outputs in the ```output``` directory.
