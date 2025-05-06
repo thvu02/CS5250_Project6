@@ -1,0 +1,138 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+    static Array memory;
+    static Array freeList;
+    static Array memBot;
+    static int heapBot;
+    static int heapBase;
+    static int segmentLength;
+    static int segmentNext;
+    static int allocationLength;
+
+    /** Initializes the class. */
+    function void init() {
+        let heapBot = 16384;
+        let heapBase = 2048;
+        let memory = 0;
+        let freeList = heapBase;
+        let segmentLength = 0;
+        let segmentNext = 1;
+        let freeList[segmentLength] = heapBot - heapBase;
+        let allocationLength = -1;
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return memory[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let memory[address] = value;
+        return;
+    }
+
+    /** helper function for next alloc()*/
+    function Array bestFitHelper(int size) {
+        var Array bestBlock, curBlock;
+        var int bestSize, curSize;
+        let bestBlock = null;
+        let curBlock = freeList;
+        let bestSize = heapBot - heapBase;
+
+        if (curBlock[segmentNext] = null) {
+            return curBlock;
+        }
+        
+        while (~(curBlock = null)) {
+            let curSize = curBlock[segmentLength] - 1;
+            if (~(curSize < size) & (curSize < bestSize)) {
+                let bestBlock = curBlock;
+                let bestSize = curSize;
+            }
+            let curBlock = curBlock[segmentNext];
+        }
+        return bestBlock;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        var Array foundBlock, nextBlock, answer;
+        let foundBlock = Memory.bestFitHelper(size);
+        let answer = foundBlock + 1;
+
+        if (~(foundBlock = null)) {
+            if (foundBlock[segmentLength] > (size + 3)) {
+                let nextBlock = foundBlock + size + 1;
+                let nextBlock[segmentNext] = foundBlock[segmentNext];
+                let nextBlock[segmentLength] = foundBlock[segmentLength] - size - 1;
+                let answer[allocationLength] = size + 1;
+                let freeList = nextBlock;
+            }
+            else {
+                let nextBlock = foundBlock[segmentNext];
+                let answer[allocationLength] = foundBlock[segmentLength];
+            }
+            let foundBlock = nextBlock;
+        }
+        return answer;
+    }
+
+    /** helper function for deAlloc() */
+    function Array findPreviousFreeBlock(int o) {
+        var Array prevBlock;
+        if (freeList > o) {
+            return null;
+        }
+        let prevBlock = freeList;
+        while (~(prevBlock[segmentNext] = null) & (prevBlock[segmentNext] < o)) {
+            let prevBlock = prevBlock[segmentNext];
+        }
+        return prevBlock;
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        var Array prevBlock, nextBlock;
+        var int size;
+
+        let size = o[allocationLength];
+        let o = o - 1;
+        let prevBlock = Memory.findPreviousFreeBlock(o);
+
+        if (prevBlock = null) {
+            let o[segmentLength] = size;
+            let o[segmentNext] = freeList;
+            let freeList = o;
+        }
+        else {
+            if ((prevBlock + prevBlock[segmentLength]) = o) {
+                let prevBlock[segmentLength] = prevBlock[segmentLength] + size;
+                let o = prevBlock;
+            }
+            else {
+                let o[segmentLength] = size;
+                let o[segmentNext] = prevBlock[segmentNext];
+                let prevBlock[segmentNext] = o;
+            }
+        }
+
+        if ((o + o[segmentLength]) = o[segmentNext]) {
+            let nextBlock = o[segmentNext];
+            let o[segmentLength] = o[segmentLength] + nextBlock[segmentLength];
+            let o[segmentNext] = nextBlock[segmentNext];
+        }
+        return;
+    }    
+}

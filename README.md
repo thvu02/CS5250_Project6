@@ -28,4 +28,4 @@ Run the JackCompiler.java code and feed a desired directory containing .jack fil
 Run the JackCompiler.java code and feed a desired directory containing .jack files to it. ```java JackCompiler.java test/{directory_name}```. Nand2Tetris provided tests and outputs of program are stored in the `test` directory. 
 
 ## Project 12
-tbd
+Compile each .jack file using the Nand2Tetris Jack Compiler. Test each .jack file in isolation by putting them into their respective folders. Do a final test after all are successful in isolation by putting everything into `Pong` directory, running the Jack Compiler, and verifying the contents are as expected.
